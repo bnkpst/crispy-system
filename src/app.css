@@ -1,0 +1,12 @@
+
+body {
+    margin: 0;
+    padding: 0;
+  }
+
+canvas {
+    outline: none;
+    display: block;
+    position: absolute;
+  }
+  

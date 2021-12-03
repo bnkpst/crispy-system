@@ -1,0 +1,28 @@
+{
+  "name": "crispy-system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel src/index.html -p 1234 --open",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bnkpst/crispy-system.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bnkpst/crispy-system/issues"
+  },
+  "homepage": "https://github.com/bnkpst/crispy-system#readme",
+  "devDependencies": {
+    "parcel": "^2.0.1",
+    "rollup": "^2.60.2"
+  },
+  "dependencies": {
+    "three": "^0.135.0"
+  }
+}
