@@ -19,10 +19,15 @@
   },
   "homepage": "https://github.com/bnkpst/crispy-system#readme",
   "devDependencies": {
-    "parcel": "^2.0.1",
-    "rollup": "^2.60.2"
+    "parcel": "latest"
   },
   "dependencies": {
+    "geotiff": "^1.0.9",
+    "image-promise": "^7.0.1",
+    "lodash": "^4.17.21",
+    "p-map": "^5.3.0",
+    "pretty-ms": "^7.0.1",
+    "stats.js": "^0.17.0",
     "three": "^0.135.0"
   }
 }

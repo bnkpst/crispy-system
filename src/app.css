@@ -9,4 +9,35 @@ canvas {
     display: block;
     position: absolute;
   }
+
+.container {
+  display: flex;
+}
+
+.monitor {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* align-items: center; */
+    margin-top: 12px;
+    margin-left: 12px;
+    padding: 6px 24px 6px 24px;
+
+    border-radius: 1em;
+    position: absolute;
+
+    background: #ccc;
+    max-height: 400px;
+    overflow: auto;
+
+}
+
+.monitor-row {
+    background-color: #ccc;
+
+}
+
+.monitor-row:nth-child(even) {
+    background-color: #fff;
+  }
   
