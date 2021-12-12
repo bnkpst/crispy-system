@@ -7,14 +7,15 @@
                 margin: 0;
                 padding: 0;
             }
-
+            canvas {
+                outline: none;
+                display: block;
+                position: absolute;
+            }
         </style>
     </head>
     <body>
-        <div class="container">
-            <canvas id="app"></canvas>
-            <div id="monitor" class="monitor"></div>
-        </div>
+        <canvas id="app"></canvas>
         <script type="module" src="index.js"></script>
     </body>
 </html>

@@ -5,6 +5,7 @@ import {OrbitControls} from './OrbitControls'
 import Stats from 'stats.js'
 import { initControls } from './Controls.js'
 
+
 export default class WebGLApp {
   _width
   _height

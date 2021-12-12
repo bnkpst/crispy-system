@@ -4,14 +4,21 @@ body {
     padding: 0;
   }
 
-canvas {
+/* canvas {
     outline: none;
     display: block;
     position: absolute;
+    background-color: blue;
+
+  } */
+
+  .canv-con {
+    /* width: 200px; */
   }
 
 .container {
   display: flex;
+  flex-direction: column;
 }
 
 .monitor {

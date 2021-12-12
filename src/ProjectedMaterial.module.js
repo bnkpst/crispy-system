@@ -353,7 +353,7 @@ class ProjectedMaterial extends THREE.MeshPhysicalMaterial {
           bool isFacingProjector = dotProduct > 0.0000001;
 
 
-          vec4 diffuseColor = vec4(diffuse, opacity * backgroundOpacity);
+          vec4 diffuseColor = vec4(diffuse, 0.0);
 
           if (isFacingProjector && isInTexture && isTextureLoaded && isTextureProjected) {
             vec4 textureColor = texture2D(projectedTexture, uv);
