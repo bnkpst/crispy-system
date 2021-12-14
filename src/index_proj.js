@@ -62,18 +62,11 @@ setInterval(() => {
     proj.position.y = nav_data[i].y - stats.minY;
     proj.position.z =  nav_data[i].alt;
 
-    const rot = new Euler( nav_data[i].r, nav_data[i].p, nav_data[i].h, 'ZXY' );
+    const rot = new Euler( nav_data[i].p, nav_data[i].r, nav_data[i].h, 'ZXY' );
 
     proj.setRotationFromEuler(rot);
     
-    webgl.renderer.render(webgl.scene, webgl.camera)
-
-    // proj.rotation.x = nav_data[i].r;
-    // proj.rotation.y = nav_data[i].p;
-    // proj.rotation.z = nav_data[i].h;
-
-    
-  
+    // webgl.renderer.render(webgl.scene, webgl.camera)
 
     i++;
 
