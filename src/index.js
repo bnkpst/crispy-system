@@ -18,45 +18,54 @@ import {
     MeshPhongMaterial,
     DoubleSide,
     DirectionalLightHelper,
-     DirectionalLight,
-     Vector3,
-     PointLight,
-     SpotLight,
-     TextureLoader,
-     SpotLightHelper,
-     AxesHelper,
-      LinearFilter,
-      NearestFilter,
-      WebGLRenderTarget,
-      OrthographicCamera,
-      DataTexture,
-      Color,
-      RGBFormat
-    
+    DirectionalLight,
+    Vector3,
+    PointLight,
+    SpotLight,
+    TextureLoader,
+    SpotLightHelper,
+    AxesHelper,
+    LinearFilter,
+    NearestFilter,
+    WebGLRenderTarget,
+    OrthographicCamera,
+    DataTexture,
+    Color,
+    RGBFormat,
+    ShaderMaterial,
+    RGBAFormat
 } from 'three';
 
 import ProjectedMaterial from './ProjectedMaterial.module';
 
 import dem_image from 'url:../public/dem_small.tif';
 import sat_image from 'url:../public/sat.jpg';
+import scan_image from 'url:../public/test.tif';
 
 import {fromUrl} from 'geotiff'
+
+import {vert, frag} from './shaders'
+
+// let dem_data;
 
 
 const canvas = document.querySelector('#app');
 
 const webgl = new WebGLApp({
     canvas, 
-    background: '#555',
+    background: '#333',
     orbitControls: true,
-    cameraPosition: new Vector3(0, -90, 60),
+    cameraPosition: new Vector3(0, -300, 600),
 });
-
 
 window.webgl = webgl;
 
 // load the example texture
 const texture = new TextureLoader().load(sat_image)
+
+
+let scan1 = null;
+
 
 fromUrl(dem_image)
 .then((tiff) => tiff.getImage())
@@ -67,9 +76,9 @@ fromUrl(dem_image)
     };
 
     const geometry = new PlaneGeometry(
-        image.width,
-        image.height,
-        image.width - 1,
+        image.width *10,
+        image.height *10,
+        image.width  - 1,
         image.height - 1
     );
 
@@ -79,10 +88,12 @@ fromUrl(dem_image)
         const arr1 = new Array(geometry.attributes.position.count);
         const arr = arr1.fill(1);
         arr.forEach((a, index) => {
-            geometry.attributes.position.setZ(index, (data[index] / 60));
+            geometry.attributes.position.setZ(index, (data[index] / 10));
         });
         console.timeEnd('parseGeom');
         console.log("Dem Done");
+
+        // dem_data = data;
 
         return geometry;
     })
@@ -91,31 +102,47 @@ fromUrl(dem_image)
 
 })
 .then((terrain_geom) => {
-    init(terrain_geom)
+
+  
+
+    fromUrl(scan_image)
+    .then((tiff) => tiff.getImage())
+    .then((tifImage) => tifImage.readRasters({interleave: true}))
+    .then((data) => {
+
+        scan1 = data;
+
+        console.log(scan1)
+
+        init(terrain_geom)
+    })
+    
 })
 
 const init = (geometry) => {
 
-    let yy = -40
+    // console.log("DEM: " + dem_data[0])
+    let yy = -500
 
     geometry.computeVertexNormals()
 
     const orthoCamera = new OrthographicCamera(
-        -50,
-        50,
-        50,
-        -50,
-        0.1,
-        100,
+        -500,
+        500,
+        500,
+        -500,
+        1,
+        1000,
       )
-      orthoCamera.position.set(0, 0, 80)
+      orthoCamera.position.set(0, 0, 600)
       orthoCamera.lookAt(new Vector3(0, 0, 0))
 
       const orthoHelp = new CameraHelper(orthoCamera)
 
-    //   webgl.scene.add(orthoHelp)
+      webgl.scene.add(orthoHelp)
 
-    const proj = new PerspectiveCamera(1,100, 1, 70)
+    const proj = new PerspectiveCamera(0.143239,628.32, 1, 1000)
+    // const proj = new PerspectiveCamera(0.5,628.32, 1, 1000)
     proj.position.set(0, yy, 50)
     proj.lookAt(0, yy,0)
 
@@ -141,22 +168,25 @@ const init = (geometry) => {
     bufferScene.add(mesh2)
     webgl.scene.add(mesh2)
 
-    const width = 16
+    let line = 0
+
+    const width = scan1.width;
     const height = 1
 
-    const data = new Uint8Array( width * height * 4 );
-	const dataTexture = new DataTexture( data, width, height, RGBFormat );
+    const data = new Uint8Array( width * height * 3 );
+
+
+	const dataTexture = new DataTexture( data, width, height, RGBFormat);
 
     updateDataTexture(dataTexture);
 
     dataTexture.needsUpdate = true
 
-
     // create the mesh with the projected material
     const material = new ProjectedMaterial({
         camera: proj,
         texture: dataTexture,
-        color: '#ccc',
+        color: '#fff',
         transparent: true,
         opacity: 1.0,
         // textureScale: 0.8,
@@ -164,18 +194,18 @@ const init = (geometry) => {
         // side: DoubleSide
     })
 
-
-
     const mesh = new Mesh(geometry, material)
 
+    const bobsMaterial = new MeshBasicMaterial({map: bufferTexture.texture, color: 0xffffff});
+
+    // const mesh200 = new Mesh(geometry, bobsMaterial)
     const mesh200 = new Mesh(geometry, material)
 
     bufferScene.add(mesh)
     webgl.scene.add(mesh200)
 
-
     // add lights
-    const ambientLight = new AmbientLight(0xffffff, 0.7)
+    const ambientLight = new AmbientLight(0xffffff, 1.0)
     bufferScene.add(ambientLight)
 
     const dirLight = new DirectionalLight(0xffffff, 0.5)
@@ -184,8 +214,7 @@ const init = (geometry) => {
     dirLight.position.z = 100
     dirLight.position.x = 100
 
-
-    const ambientLight2 = new AmbientLight(0xffffff, 0.7)
+    const ambientLight2 = new AmbientLight(0xffffff, 0.4)
     webgl.scene.add(ambientLight2)
 
     // const camera2 = new PerspectiveCamera(60, 1, 0.1, 1000)
@@ -200,26 +229,36 @@ const init = (geometry) => {
 
 
 
-  
+    // const shaderMaterial = new ShaderMaterial( {
 
-    const boxMaterial = new MeshBasicMaterial({map: bufferTexture.texture, color: 0xffffff});
+    //     vertexShader: vert,
+    //     fragmentShader: frag,
+    //     uniforms: {
+    //         myTexture: { 
+    //             type: "t", 
+    //             value: bufferTexture.texture
+    //       },
+    //     }});
+
+    const planeMaterial = new MeshBasicMaterial({map: bufferTexture.texture, color: 0xffffff});
     // const boxMaterial = new MeshBasicMaterial({map: dataTexture});
 
-    const geom = new PlaneGeometry(50, 50)
+    const geom = new PlaneGeometry(10000, 10000)
 
-    const movieScreen = new Mesh(geom, boxMaterial);
+    const movieScreen = new Mesh(geom, planeMaterial);
 
-    // movieScreen.rotation.x = Math.PI /2
+    movieScreen.rotation.x = Math.PI /2
     // movieScreen.position.y = -50
-    movieScreen.position.x = 60
-    movieScreen.position.z = 10
+    movieScreen.position.x = 7000
+    movieScreen.position.y = 500
+    movieScreen.position.z = 100
     
 
     webgl.scene.add(movieScreen);
 
     material.project(mesh);
 
-    renderMe(bufferTexture, bufferScene, orthoCamera);
+    renderMe(bufferTexture, bufferScene, orthoCamera, false);
 
     // webgl.renderer.render(bufferScene, camera2, bufferTexture);
 
@@ -229,61 +268,91 @@ const init = (geometry) => {
 
     setInterval(() => {
 
-        yy = yy + 0.05;
-        proj.position.set(0, yy, 50)
+        yy = yy + 0.2
+        proj.position.set(0, yy, 500)
         proj.lookAt(0, yy,0)
-        updateDataTexture(dataTexture);
 
-        dataTexture.needsUpdate = true
-   
+
+
+        // if (yy % 90) {
+            updateDataTexture(dataTexture, line);
+
+            dataTexture.needsUpdate = true
+       
+        // }
+        line++;
+
+        if(line >= scan1.height) {line = 0}
+
         // material.needsUpdate = true
     
         material.project(mesh)
-        renderMe(bufferTexture, bufferScene, orthoCamera);
+        renderMe(bufferTexture, bufferScene, orthoCamera, false);
         
 
-        if(yy > 50){yy = -50}
-    },10)
+        if(yy > 500){
+            renderMe(bufferTexture, bufferScene, orthoCamera, true);
+            yy = -500
+        }
+    },1)
 
     webgl.start()
 
 }
 
-const renderMe = (bufferTexture, bufferScene, cam) => {
+const renderMe = (bufferTexture, bufferScene, cam, clear) => {
     webgl.renderer.setRenderTarget( bufferTexture );
 
-    // webgl.renderer.setClearColor(0xcccccc);
+    // webgl.renderer.setClearColor(0x000000);
     
     // webgl.renderer.clear();
+
+    webgl.renderer.autoClearColor = false ;
+    if(clear) {
+        webgl.renderer.setClearColor(0xffffff);
+        webgl.renderer.clear();
+    } 
+
+ 
     
     webgl.renderer.render( bufferScene, cam );
-    
+    webgl.renderer.setClearColor(0x333333);
     webgl.renderer.setRenderTarget( null );
+    webgl.renderer.autoClearColor = true ;
 }
 
-function updateDataTexture( texture ) {
+function updateDataTexture( texture, line ) {
 
-    const color = new Color();
+   
 
-    const size = texture.image.width * texture.image.height;
+    // const color = new Color();
+
+    const size = texture.image.width// * texture.image.height;
     const data = texture.image.data;
 
     // generate a random color and update texture data
 
-    color.setHex( Math.random() * 0xffffff );
+    // color.setHex( Math.random() * 0xffffff );
 
-    const r = Math.floor( color.r * 255 );
-    const g = Math.floor( color.g * 255 );
-    const b = Math.floor( color.b * 255 );
+    // const r = Math.floor( color.r * 255 );
+    // const g = Math.floor( color.g * 255 );
+    // const b = Math.floor( color.b * 255 );
 
     for ( let i = 0; i < size; i ++ ) {
 
-        const stride = i * 4;
+        const stride = i * 3;
 
-        data[ stride ] = r;
-        data[ stride + 1 ] = g;
-        data[ stride + 2 ] = b;
-        data[ stride + 3 ] = 1;
+        // data[ stride ] = r;
+        // data[ stride + 1 ] = g;
+        // data[ stride + 2 ] = b;
+        // data[ stride + 3 ] = 1;
+
+        data[ stride ] = scan1[stride + (3 * line * 750)];
+        data[ stride + 1 ] = scan1[ (stride + 1) + (3 * line * 750) ];
+        data[ stride + 2 ] = scan1[ (stride + 2) + (3 * line * 750) ];
+        // data[ stride + 3 ] = 1;
+
+        // data[ stride + 3 ] = scan1[ (stride + 3) + (line * size) ];
 
     }
 

@@ -38,8 +38,8 @@ export default class WebGLApp {
     backgroundAlpha = 1,
     fov = 45,
     frustumSize = 3,
-    near = 0.1,
-    far = 1000,
+    near = 1,
+    far = 30000,
     ...options
   } = {}) {
     this.renderer = new THREE.WebGLRenderer({
@@ -169,7 +169,7 @@ export default class WebGLApp {
 
       this.orbitControls.enableDamping = true
       this.orbitControls.dampingFactor = 0.15
-      this.orbitControls.enablePan = false
+      this.orbitControls.enablePan = true
 
       if (options.orbitControls instanceof Object) {
         Object.keys(options.orbitControls).forEach((key) => {
@@ -383,6 +383,8 @@ export default class WebGLApp {
     if (this.composer) {
       this.composer.render(this.dt)
     } else {
+
+ 
       this.renderer.render(this.scene, this.camera)
     }
     return this
